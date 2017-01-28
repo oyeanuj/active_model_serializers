@@ -1,21 +1,28 @@
 ## 0.10.x
 
-### [master (unreleased)](https://github.com/rails-api/active_model_serializers/compare/v0.10.3...master)
+### [master (unreleased)](https://github.com/rails-api/active_model_serializers/compare/v0.10.4...master)
 
 Breaking changes:
 
 Features:
 
-- [#1982](https://github.com/rails-api/active_model_serializers/pull/1982) Add ActiveModelSerializers::Model.attributes to configure PORO attributes (@bf4).
+- [#2021](https://github.com/rails-api/active_model_serializers/pull/2021) ActiveModelSerializers::Model#attributes. Originally in [#1982](https://github.com/rails-api/active_model_serializers/pull/1982). (@bf4)
 
 Fixes:
 
-- [#1984](https://github.com/rails-api/active_model_serializers/pull/1984) Mutation of ActiveModelSerializers::Model now changes the attributes. (@bf4)
+- [#2022](https://github.com/rails-api/active_model_serializers/pull/2022) Mutation of ActiveModelSerializers::Model now changes the attributes. Originally in [#1984](https://github.com/rails-api/active_model_serializers/pull/1984). (@bf4)
 
 Misc:
 
-- [#1984](https://github.com/rails-api/active_model_serializers/pull/1984) Make test attributes explicit. Test models have 'associations' support. (@bf4)
-- [#1993](https://github.com/rails-api/active_model_serializers/pull/1993) Swap out KeyTransform for CaseTransform gem for the possibility of native extension use (@NullVoxPopuli)
+- [#2021](https://github.com/rails-api/active_model_serializers/pull/2021) Make test attributes explicit. Tests have Model#associations. (@bf4)
+- [#1981](https://github.com/rails-api/active_model_serializers/pull/1981) Fix relationship link documentation. (@groyoh)
+
+### [v0.10.4 (2017-01-06)](https://github.com/rails-api/active_model_serializers/compare/v0.10.3...v0.10.4)
+
+Misc:
+
+- [#2005](https://github.com/rails-api/active_model_serializers/pull/2005) Update jsonapi runtime dependency to 0.1.1.beta6, support Ruby 2.4. (@kofronpi)
+- [#1993](https://github.com/rails-api/active_model_serializers/pull/1993) Swap out KeyTransform for CaseTransform gem for the possibility of native extension use. (@NullVoxPopuli)
 
 ### [v0.10.3 (2016-11-21)](https://github.com/rails-api/active_model_serializers/compare/v0.10.2...v0.10.3)
 

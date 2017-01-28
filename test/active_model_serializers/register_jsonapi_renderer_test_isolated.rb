@@ -12,7 +12,17 @@ class JsonApiRendererTest < ActionDispatch::IntegrationTest
     end
 
     def render_with_jsonapi_renderer
-      author = Author.new(params[:data][:attributes])
+      permitted_params = params.permit(data: [:id, :type, attributes: [:name]])
+      permitted_params = permitted_params.to_h.with_indifferent_access
+      attributes =
+        if permitted_params[:data]
+          permitted_params[:data][:attributes].merge(id: permitted_params[:data][:id])
+        else
+          # Rails returns empty params when no mime type can be negotiated.
+          # (Until https://github.com/rails/rails/pull/26632 is reviewed.)
+          permitted_params
+        end
+      author = Author.new(attributes)
       render jsonapi: author
     end
 
@@ -32,6 +42,17 @@ class JsonApiRendererTest < ActionDispatch::IntegrationTest
     assert_equal(expected, TestController.last_request_parameters)
   end
 
+  def define_author_model_and_serializer
+    TestController.const_set(:Author, Class.new(ActiveModelSerializers::Model) do
+      attributes :id, :name
+    end)
+    TestController.const_set(:AuthorSerializer, Class.new(ActiveModel::Serializer) do
+      type 'users'
+      attribute :id
+      attribute :name
+    end)
+  end
+
   class WithoutRenderer < JsonApiRendererTest
     setup do
       require 'rails'
@@ -47,6 +68,7 @@ class JsonApiRendererTest < ActionDispatch::IntegrationTest
           match ':action', to: TestController, via: [:get, :post]
         end
       end
+      define_author_model_and_serializer
     end
 
     def test_jsonapi_parser_not_registered
@@ -59,18 +81,12 @@ class JsonApiRendererTest < ActionDispatch::IntegrationTest
     end
 
     def test_jsonapi_renderer_not_registered
-      expected = {
-        'data' => {
-          'attributes' => {
-            'name' => 'Johnny Rico'
-          },
-          'type' => 'users'
-        }
-      }
-      payload = '{"data": {"attributes": {"name": "Johnny Rico"}, "type": "authors"}}'
+      payload = '{"data": {"attributes": {"name": "Johnny Rico"}, "type": "users", "id": "36c9c04e-86b1-4636-a5b0-8616672d1765"}}'
       headers = { 'CONTENT_TYPE' => 'application/vnd.api+json' }
       post '/render_with_jsonapi_renderer', params: payload, headers: headers
-      assert expected, response.body
+      assert_equal '', response.body
+      assert_equal 500, response.status
+      assert_equal ActionView::MissingTemplate, request.env['action_dispatch.exception'].class
     end
 
     def test_jsonapi_parser
@@ -98,6 +114,7 @@ class JsonApiRendererTest < ActionDispatch::IntegrationTest
           match ':action', to: TestController, via: [:get, :post]
         end
       end
+      define_author_model_and_serializer
     end
 
     def test_jsonapi_parser_registered
@@ -113,16 +130,16 @@ class JsonApiRendererTest < ActionDispatch::IntegrationTest
     def test_jsonapi_renderer_registered
       expected = {
         'data' => {
-          'attributes' => {
-            'name' => 'Johnny Rico'
-          },
-          'type' => 'users'
+          'id' => '36c9c04e-86b1-4636-a5b0-8616672d1765',
+          'type' => 'users',
+          'attributes' => { 'name' => 'Johnny Rico' }
         }
       }
-      payload = '{"data": {"attributes": {"name": "Johnny Rico"}, "type": "authors"}}'
+
+      payload = '{"data": {"attributes": {"name": "Johnny Rico"}, "type": "users", "id": "36c9c04e-86b1-4636-a5b0-8616672d1765"}}'
       headers = { 'CONTENT_TYPE' => 'application/vnd.api+json' }
       post '/render_with_jsonapi_renderer', params: payload, headers: headers
-      assert expected, response.body
+      assert_equal expected.to_json, response.body
     end
 
     def test_jsonapi_parser
@@ -132,10 +149,11 @@ class JsonApiRendererTest < ActionDispatch::IntegrationTest
             'attributes' => {
               'name' => 'John Doe'
             },
-            'type' => 'users'
+            'type' => 'users',
+            'id' => '36c9c04e-86b1-4636-a5b0-8616672d1765'
           }
         },
-        '{"data": {"attributes": {"name": "John Doe"}, "type": "users"}}',
+        '{"data": {"attributes": {"name": "John Doe"}, "type": "users", "id": "36c9c04e-86b1-4636-a5b0-8616672d1765"}}',
         'CONTENT_TYPE' => 'application/vnd.api+json'
       )
     end
