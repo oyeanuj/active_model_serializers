@@ -1,3 +1,4 @@
+=begin
 require 'rails/generators'
 require 'rails/generators/rails/scaffold_controller/scaffold_controller_generator'
 
@@ -12,3 +13,4 @@ module Rails
     end
   end
 end
+=end
